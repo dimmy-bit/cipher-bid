@@ -407,6 +407,23 @@ export default function Home() {
             </div>
           ))}
         </div>
+
+        {/* Made by Mir */}
+        <div className="mt-6 text-center">
+          <a
+            href="https://x.com/0xmirx"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-[11px] font-mono text-neon-green/60 hover:text-neon-green/80 transition-all duration-300 hover:scale-105 tracking-widest uppercase"
+            style={{
+              textShadow: '0 0 10px rgba(0, 255, 0, 0.3)',
+            }}
+          >
+            <span className="inline-block w-1 h-1 bg-neon-green/60 rounded-full animate-pulse"></span>
+            MADE BY MIR
+            <span className="inline-block w-1 h-1 bg-neon-green/60 rounded-full animate-pulse"></span>
+          </a>
+        </div>
       </motion.div>
     </div>
   );
