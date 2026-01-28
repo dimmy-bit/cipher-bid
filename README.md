@@ -205,7 +205,7 @@ npm start
 
 ### 4️⃣ **Access dApp**
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open https://cipher-bid-z5n3.vercel.app/ (http://localhost:3000) in your browser.
 
 ---
 
