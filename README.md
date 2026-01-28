@@ -236,10 +236,6 @@ Open https://cipher-bid-z5n3.vercel.app/ (http://localhost:3000) in your browser
 **For Regular Users:**
 - Shows "👑 Waiting for next round..."
 
-**For Contract Owner:**
-- Duration input field
-- "START ROUND" button
-- Can set any round length
 
 ### 🔄 **Rolling Rounds (Owner Only)**
 
@@ -547,8 +543,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support & Contact
 
 - **GitHub Issues**: [Report bugs](https://github.com/dimmy-bit/cipher-bid/issues)
-- **Discord**: Join our community
-- **Twitter**: Follow for updates
+
+- **Twitter**: https://x.com/0XMIRX
 
 ---
 
