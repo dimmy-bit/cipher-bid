@@ -1,0 +1,93 @@
+/// @dev Pure in this function is marked as a hack/workaround - note that this function is NOT pure as fetches of ciphertexts require state access
+    /// @param lhs input of type euint64
+    /// @param rhs second input of type euint64
+    /// @return the result of the gte
+    function gte(euint64 lhs, euint64 rhs) internal returns (ebool) {
+        return FHE.gte(lhs, rhs);
+    }
+
+    /// @notice Performs the lt operation
+    /// @dev Pure in this function is marked as a hack/workaround - note that this function is NOT pure as fetches of ciphertexts require state access
+    /// @param lhs input of type euint64
+    /// @param rhs second input of type euint64
+    /// @return the result of the lt
+    function lt(euint64 lhs, euint64 rhs) internal returns (ebool) {
+        return FHE.lt(lhs, rhs);
+    }
+
+    /// @notice Performs the lte operation
+    /// @dev Pure in this function is marked as a hack/workaround - note that this function is NOT pure as fetches of ciphertexts require state access
+    /// @param lhs input of type euint64
+    /// @param rhs second input of type euint64
+    /// @return the result of the lte
+    function lte(euint64 lhs, euint64 rhs) internal returns (ebool) {
+        return FHE.lte(lhs, rhs);
+    }
+
+    /// @notice Performs the max operation
+    /// @dev Pure in this function is marked as a hack/workaround - note that this function is NOT pure as fetches of ciphertexts require state access
+    /// @param lhs input of type euint64
+    /// @param rhs second input of type euint64
+    /// @return the result of the max
+    function max(euint64 lhs, euint64 rhs) internal returns (euint64) {
+        return FHE.max(lhs, rhs);
+    }
+
+    /// @notice Performs the min operation
+    /// @dev Pure in this function is marked as a hack/workaround - note that this function is NOT pure as fetches of ciphertexts require state access
+    /// @param lhs input of type euint64
+    /// @param rhs second input of type euint64
+    /// @return the result of the min
+    function min(euint64 lhs, euint64 rhs) internal returns (euint64) {
+        return FHE.min(lhs, rhs);
+    }
+
+    /// @notice Performs the shl operation
+    /// @dev Pure in this function is marked as a hack/workaround - note that this function is NOT pure as fetches of ciphertexts require state access
+    /// @param lhs input of type euint64
+    /// @param rhs second input of type euint64
+    /// @return the result of the shl
+    function shl(euint64 lhs, euint64 rhs) internal returns (euint64) {
+        return FHE.shl(lhs, rhs);
+    }
+
+    /// @notice Performs the shr operation
+    /// @dev Pure in this function is marked as a hack/workaround - note that this function is NOT pure as fetches of ciphertexts require state access
+    /// @param lhs input of type euint64
+    /// @param rhs second input of type euint64
+    /// @return the result of the shr
+    function shr(euint64 lhs, euint64 rhs) internal returns (euint64) {
+        return FHE.shr(lhs, rhs);
+    }
+
+    /// @notice Performs the rol operation
+    /// @dev Pure in this function is marked as a hack/workaround - note that this function is NOT pure as fetches of ciphertexts require state access
+    /// @param lhs input of type euint64
+    /// @param rhs second input of type euint64
+    /// @return the result of the rol
+    function rol(euint64 lhs, euint64 rhs) internal returns (euint64) {
+        return FHE.rol(lhs, rhs);
+    }
+
+    /// @notice Performs the ror operation
+    /// @dev Pure in this function is marked as a hack/workaround - note that this function is NOT pure as fetches of ciphertexts require state access
+    /// @param lhs input of type euint64
+    /// @param rhs second input of type euint64
+    /// @return the result of the ror
+    function ror(euint64 lhs, euint64 rhs) internal returns (euint64) {
+        return FHE.ror(lhs, rhs);
+    }
+
+    /// @notice Performs the square operation
+    /// @dev Pure in this function is marked as a hack/workaround - note that this function is NOT pure as fetches of ciphertexts require state access
+    /// @param lhs input of type euint64
+    /// @return the result of the square
+    function square(euint64 lhs) internal returns (euint64) {
+        return FHE.square(lhs);
+    }
+    function toBool(euint64 value) internal  returns (ebool) {
+        return FHE.asEbool(value);
+    }
+    function toU8(euint64 value) internal returns (euint8) {
+        return FHE.asEuint8(value);
+    }
