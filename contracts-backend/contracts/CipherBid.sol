@@ -14,6 +14,8 @@ contract CipherBid {
     uint256 public endTime;
     address public owner;
     bool public claimed;
+    uint256 public totalBids;
+    bool public ended;
     
     event BidPlaced(address indexed bidder);
     event AuctionEnded(address indexed winner);
@@ -22,6 +24,8 @@ contract CipherBid {
         owner = msg.sender;
         endTime = block.timestamp + (_durationInHours * 1 hours);
         claimed = false;
+        totalBids = 0;
+        ended = false;
         // NOTE: We do NOT initialize handles here to avoid constructor-time ACL issues
     }
     
@@ -32,6 +36,10 @@ contract CipherBid {
     function bid(InEuint32 calldata encryptedAmount) external {
         require(block.timestamp < endTime, "Auction has ended");
         require(!claimed, "Auction already claimed");
+        require(!ended, "Auction has ended");
+        
+        // Increment bid counter
+        totalBids++;
         
         // 1. Convert user input and immediately authorize this contract
         euint32 newBid = FHE.asEuint32(encryptedAmount);
@@ -72,10 +80,11 @@ contract CipherBid {
         require(block.timestamp >= endTime, "Auction has not ended yet");
         require(!claimed, "Auction already claimed");
         
-        FHE.allowThis(winner);
-        FHE.decrypt(winner);
-        
+        // For now, just mark as claimed and ended
+        // TODO: Implement proper winner decryption in production
         claimed = true;
+        ended = true;
+        
         emit AuctionEnded(msg.sender);
     }
     
@@ -90,5 +99,32 @@ contract CipherBid {
     function timeRemaining() external view returns (uint256) {
         if (block.timestamp >= endTime) return 0;
         return endTime - block.timestamp;
+    }
+    
+    /**
+     * @notice Start a new auction round
+     * @param durationMinutes Duration of the new round in minutes
+     */
+    function startNewRound(uint256 durationMinutes) external onlyOwner {
+        require(claimed || ended, "Current auction must be claimed or ended first");
+        
+        // Reset auction state
+        highestBid = FHE.asEuint32(0);
+        winner = FHE.asEaddress(address(0));
+        totalBids = 0;
+        claimed = false;
+        ended = false;
+        
+        // Set new end time
+        endTime = block.timestamp + (durationMinutes * 1 minutes);
+        
+        // Allow handles for the new round
+        FHE.allowGlobal(highestBid);
+        FHE.allowGlobal(winner);
+    }
+    
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can call this function");
+        _;
     }
 }

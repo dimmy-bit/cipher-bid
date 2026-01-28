@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useFhenix } from "@/hooks/useFhenix";
 import { motion, AnimatePresence } from "framer-motion";
-import { Wallet, Gavel, Timer, Trophy, Lock, ShieldCheck, AlertCircle, CheckCircle2, ChevronRight } from "lucide-react";
+import { Wallet, Gavel, Timer, Trophy, Lock, ShieldCheck, AlertCircle, CheckCircle2, ChevronRight, Flame, RotateCcw, Crown } from "lucide-react";
 import ABI from "@/lib/abi.json";
 import { toast, Toaster } from "sonner";
 
-const CONTRACT_ADDRESS = "0xe9bAd33A432e931FE68ff62FA679a61C93B11EAB";
+const CONTRACT_ADDRESS = "0x40a0b2d266262e8453F645a5FDc9237587Fde5f7";
 
 export default function Home() {
   const { address, isInitialized, connect, disconnect, encryptUint32, error: fhenixError, provider } = useFhenix();
@@ -17,6 +17,11 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [highestBidEncrypted, setHighestBidEncrypted] = useState(false);
   const [auctionEnded, setAuctionEnded] = useState(false);
+  const [totalBids, setTotalBids] = useState<number>(0);
+  const [isWinner, setIsWinner] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+  const [claimed, setClaimed] = useState(false);
+  const [newRoundDuration, setNewRoundDuration] = useState("5");
 
   useEffect(() => {
     if (provider && isInitialized) {
@@ -35,6 +40,21 @@ export default function Home() {
 
       const hb = await contract.getEncryptedHighestBid();
       setHighestBidEncrypted(hb !== BigInt(0));
+      
+      // Fetch total bids
+      const bids = await contract.totalBids();
+      setTotalBids(Number(bids));
+      
+      // Check if user is owner
+      if (address) {
+        const ownerAddress = await contract.owner();
+        setIsOwner(address.toLowerCase() === ownerAddress.toLowerCase());
+      }
+      
+      // Check claimed status
+      const claimedStatus = await contract.claimed();
+      setClaimed(claimedStatus);
+      
     } catch (err) {
       console.error("Failed to fetch auction details:", err);
     }
@@ -110,6 +130,67 @@ export default function Home() {
     }
   };
 
+  const handleClaim = async () => {
+    if (!isInitialized) {
+      toast.error("Please connect your wallet first");
+      return;
+    }
+
+    setLoading(true);
+    const claimToastId = toast.loading("Claiming prize...");
+
+    try {
+      const signer = await provider!.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+      
+      const tx = await contract.claim();
+      await tx.wait();
+      
+      toast.success("Prize claimed successfully!", { id: claimToastId, icon: <Trophy className="text-neon-green" /> });
+      fetchAuctionDetails();
+    } catch (err: any) {
+      console.error("Claim failed:", err);
+      const errorMsg = err.reason || err.message || "Failed to claim prize";
+      toast.error(errorMsg, { id: claimToastId });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStartNewRound = async () => {
+    if (!isInitialized) {
+      toast.error("Please connect your wallet first");
+      return;
+    }
+
+    const duration = parseInt(newRoundDuration);
+    if (isNaN(duration) || duration <= 0) {
+      toast.error("Please enter a valid duration");
+      return;
+    }
+
+    setLoading(true);
+    const startToastId = toast.loading("Starting new round...");
+
+    try {
+      const signer = await provider!.getSigner();
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+      
+      // Use custom duration from input
+      const tx = await contract.startNewRound(duration);
+      await tx.wait();
+      
+      toast.success(`New ${duration}-minute round started!`, { id: startToastId, icon: <RotateCcw className="text-neon-green" /> });
+      fetchAuctionDetails();
+    } catch (err: any) {
+      console.error("Start new round failed:", err);
+      const errorMsg = err.reason || err.message || "Failed to start new round";
+      toast.error(errorMsg, { id: startToastId });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -173,7 +254,7 @@ export default function Home() {
         <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden group">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neon-purple via-neon-green to-neon-purple opacity-50" />
 
-          <div className="grid grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-3 gap-6 mb-8">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-zinc-500 text-xs uppercase tracking-wider font-bold">
                 <Timer size={14} /> Time Remaining
@@ -197,6 +278,15 @@ export default function Home() {
                 )}
               </div>
             </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-zinc-500 text-xs uppercase tracking-wider font-bold">
+                <Flame size={14} /> Total Bids
+              </div>
+              <div className="flex items-center gap-2 text-3xl font-mono tracking-tighter text-neon-green">
+                🔥 {totalBids}
+              </div>
+            </div>
           </div>
 
           {!isInitialized ? (
@@ -207,7 +297,57 @@ export default function Home() {
               <Wallet size={20} className="group-hover:rotate-12 transition-transform" />
               CONNECT BIDDER WALLET
             </button>
+          ) : auctionEnded ? (
+            // Auction Ended UI
+            <div className="space-y-4">
+              {!claimed ? (
+                <>
+                  {isOwner ? (
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          placeholder="Minutes"
+                          value={newRoundDuration}
+                          onChange={(e) => setNewRoundDuration(e.target.value)}
+                          disabled={loading}
+                          className="flex-1 h-12 bg-zinc-950/50 border-2 border-zinc-800 rounded-xl px-4 text-lg font-mono focus:border-neon-purple focus:outline-none focus:ring-4 focus:ring-neon-purple/10 transition-all placeholder:text-zinc-800 text-center"
+                        />
+                        <button
+                          onClick={handleStartNewRound}
+                          disabled={loading}
+                          className="flex-1 h-12 rounded-xl bg-neon-purple text-zinc-50 font-bold text-lg flex items-center justify-center gap-2 hover:shadow-[0_0_30px_rgba(157,0,255,0.4)] hover:scale-[1.01] active:scale-95 transition-all duration-500"
+                        >
+                          {loading ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              PROCESSING...
+                            </div>
+                          ) : (
+                            <>
+                              <RotateCcw size={16} />
+                              START ROUND
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-16 rounded-2xl bg-zinc-800 text-zinc-500 font-bold text-lg flex items-center justify-center gap-3">
+                      <Crown size={20} />
+                      Waiting for next round...
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="w-full h-16 rounded-2xl bg-zinc-800 text-zinc-500 font-bold text-lg flex items-center justify-center gap-3">
+                  <Trophy size={20} />
+                  Auction Claimed
+                </div>
+              )}
+            </div>
           ) : (
+            // Active Auction UI
             <motion.form
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -259,7 +399,7 @@ export default function Home() {
           {[
             { label: "Network", val: "Sepolia" },
             { label: "Privacy", val: "FHE v1" },
-            { label: "Status", val: "Live" }
+            { label: "Status", val: auctionEnded ? "Ended" : "Live" }
           ].map((item) => (
             <div key={item.label} className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-4 text-center">
               <div className="text-[10px] text-zinc-500 uppercase tracking-widest mb-1">{item.label}</div>
