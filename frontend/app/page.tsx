@@ -8,7 +8,7 @@ import { Wallet, Gavel, Timer, Trophy, Lock, ShieldCheck, AlertCircle, CheckCirc
 import ABI from "@/lib/abi.json";
 import { toast, Toaster } from "sonner";
 
-const CONTRACT_ADDRESS = "0x40a0b2d266262e8453F645a5FDc9237587Fde5f7";
+const CONTRACT_ADDRESS = "0x86C66E6c1ce8A5C65DaDC883371Ec1Ca7ABEc8e6";
 
 export default function Home() {
   const { address, isInitialized, connect, disconnect, encryptUint32, error: fhenixError, provider } = useFhenix();
@@ -48,24 +48,12 @@ export default function Home() {
       // Check if user is owner
       if (address) {
         const ownerAddress = await contract.owner();
-        const ownerStatus = address.toLowerCase() === ownerAddress.toLowerCase();
-        setIsOwner(ownerStatus);
-        console.log("Owner Debug:", {
-          userAddress: address,
-          contractOwner: ownerAddress,
-          isOwner: ownerStatus
-        });
+        setIsOwner(address.toLowerCase() === ownerAddress.toLowerCase());
       }
       
       // Check claimed status
       const claimedStatus = await contract.claimed();
       setClaimed(claimedStatus);
-      console.log("Auction Status Debug:", {
-        auctionEnded,
-        claimed: claimedStatus,
-        isOwner,
-        totalBids
-      });
       
     } catch (err) {
       console.error("Failed to fetch auction details:", err);
@@ -260,15 +248,6 @@ export default function Home() {
           <p className="text-zinc-400 font-mono text-sm tracking-widest uppercase">
             Quantifiably Private Auctions
           </p>
-        </div>
-
-        {/* Debug Info - Remove in production */}
-        <div className="mb-4 p-3 bg-zinc-800/50 border border-zinc-700 rounded-xl text-xs font-mono">
-          <div>Connected: {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "No"}</div>
-          <div>Is Owner: {isOwner ? "YES" : "NO"}</div>
-          <div>Auction Ended: {auctionEnded ? "YES" : "NO"}</div>
-          <div>Claimed: {claimed ? "YES" : "NO"}</div>
-          <div>Total Bids: {totalBids}</div>
         </div>
 
         {/* Main Card */}

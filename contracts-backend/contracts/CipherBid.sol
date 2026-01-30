@@ -106,7 +106,7 @@ contract CipherBid {
      * @param durationMinutes Duration of the new round in minutes
      */
     function startNewRound(uint256 durationMinutes) external onlyOwner {
-        require(claimed || ended, "Current auction must be claimed or ended first");
+        require(block.timestamp >= endTime, "Auction has not ended yet");
         
         // Reset auction state
         highestBid = FHE.asEuint32(0);
